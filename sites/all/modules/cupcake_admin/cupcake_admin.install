@@ -1,0 +1,8 @@
+<?php
+
+/**
+* Implements hook_uninstall()
+*/
+function cupcake_admin_uninstall(){
+    variable_del('cupcake_content_type');
+}

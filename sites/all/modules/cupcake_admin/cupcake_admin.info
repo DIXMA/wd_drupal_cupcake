@@ -1,0 +1,11 @@
+name = Cupcake Admin
+description = "Admin cupcakes"
+package = DEVELOPMENT
+version = Modules
+core = 7.x
+
+; Information added by Drupal.org packaging script on 2015-10-23
+version = "1.1"
+project = "cupcake_admin"
+datestamp = "1448404945"
+

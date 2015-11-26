@@ -1,0 +1,148 @@
+<?php
+
+
+function cupcake_admin_permission(){
+    return array(
+        'administer my module' => array(
+            'title' => t('Permission admin cupcake'),
+            'description' => t('Permission form module admin cupcake')
+        )
+    );
+}
+
+/**
+ * Function that adds menu items to access the list of cupcake
+ * @return mixed
+ */
+function cupcake_admin_menu(){
+    //Menu Item for add cupcake
+    $items['cupcake_admin/add_cupcake'] = array(
+        'title' => t('Add Cupcake'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('cupcake_admin_add'),
+        'access arguments' => array('Permission admin cupcake'),
+        'type' => MENU_CALLBACK,
+    );
+    //Menu Item for list cupcake
+    $items['cupcake_admin/list'] = array(
+        'title' => 'List Cupcake',
+        'page callback' => 'cupcake_admin_page',
+        'access arguments' => array('Permission admin cupcake'),
+        'type' => MENU_CALLBACK,
+    );
+
+    //Menu Item for edit cupcake
+    $items['cupcake_admin/edit/%'] = array(
+        'title' => 'Edit Cupcake',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array(2),
+        'access arguments' => array('Permission admin cupcake'),
+        'type' => MENU_CALLBACK,
+    );
+
+    //Menu Item for delete cupcake
+    $items['cupcake_admin/delete/%'] = array(
+        'title' => 'Delete Cupcake',
+        'page callback' => 'delete_cupcake',
+        'page arguments' => array(2),
+        'access arguments' => array('Permission admin cupcake'),
+        'type' => MENU_CALLBACK,
+    );
+
+    return $items;
+}
+
+/**
+ * Form add cupcake
+ */
+function cupcake_admin_add(){
+    $form = array();
+
+    $form['name'] = array(
+        '#title' => t('Name'),
+        '#type' => 'textfield',
+        '#description' => t(''),
+        '#required' => TRUE,
+        '#default_value' => '',
+        '#size' => 30
+    );
+    $form['price'] = array(
+        '#title' => t('Price'),
+        '#type' => 'textfield',
+        '#description' => t(''),
+        '#required' => TRUE,
+        '#default_value' => '',
+        '#size' => 30
+    );
+    $form['ingredients'] = array(
+        '#title' => t('Ingredients'),
+        '#type' => 'textfield',
+        '#description' => t(''),
+        '#required' => TRUE,
+        '#default_value' => '',
+        '#size' => 30
+    );
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Save'
+    );
+
+    return $form;
+}
+
+/**
+ * Submit to form add cupcake
+ * @param $form
+ * @param $form_state
+ * @throws Exception
+ */
+function cupcake_admin_add_submit($form, &$form_state){
+
+    $result = db_insert('cupcake')
+        ->fields(array(
+            'name' => $form_state['values']['name'],
+            'price' => $form_state['values']['price'],
+            'description' => $form_state['values']['ingredients'],
+            'type_id' => '1',
+            'time_created' => date('Y-m-d')
+        ))
+        ->execute();
+    drupal_set_message("Add Cupcake ¡Ok!");
+
+}
+
+/**
+ * Function to return cupcake list
+ * @return Cupcake List
+ */
+function cupcake_admin_page(){
+    $out = "";
+    $out .=l('Add a new Cupcake to stock', 'cupcake_admin');
+
+    $header = array(t('ID'), t('NAME'), t('PRICE'), t('DESCRIPTION'),t('TYPE'), t('TIME CREATED'), t('TIME UPDATED'), t('Edit'), t('Delete'));
+    $query = db_select('cupcake', 'c');
+    $query->fields('c')
+                ->orderBy('c.id');
+    $result = $query->execute();
+
+    $rows = array();
+
+    foreach($result as $r){
+        $rows[] = array(
+            check_plain($r->id),
+            check_plain($r->name),
+            check_plain($r->price),
+            check_plain($r->description),
+            check_plain($r->type_id),
+            check_plain($r->time_created),
+            check_plain($r->time_updated),
+            l('Edit', 'cupcake_admin/edit/'.$r->id),
+            l('Delete', 'cupcake_admin/delete/'.$r->id)
+        );
+    }
+
+    $out .= theme('table', array('header' => $header, 'rows' => $rows));
+
+    return $out;
+}
+
